@@ -1,68 +1,135 @@
 Gonzal 360 Panorama 사용방법
 
-1. 360 사진 업로드 위치
-- GitHub 저장소: GonzalJeong/360-pano
-- 모든 360 JPG 파일은 pano 폴더 안에 업로드합니다.
+1. 기본 구조
 
-예:
-pano/wonji-01.jpg
-pano/wonji-02.jpg
-pano/wonji-03.jpg
-
-2. 공유 링크 만드는 방법
-아래 기본 주소 뒤에 사진 파일명을 그대로 붙입니다.
-
-기본 주소:
-https://gonzaljeong.github.io/360-pano/?img=
-
-예:
-https://gonzaljeong.github.io/360-pano/?img=wonji-01.jpg
-https://gonzaljeong.github.io/360-pano/?img=wonji-02.jpg
-
-즉,
-https://gonzaljeong.github.io/360-pano/?img= + 파일명
-형식입니다.
-
-3. 새 사진 추가 방법
-1) GitHub에서 360-pano 저장소를 엽니다.
-2) pano 폴더로 들어갑니다.
-3) Add file -> Upload files를 선택합니다.
-4) 새 360 JPG 파일을 업로드합니다.
-5) Commit changes를 눌러 저장합니다.
-6) 위의 기본 주소 뒤에 새 파일명을 붙여 공유 링크를 만듭니다.
-
-예:
-새 파일: yangsan-01.jpg
-공유 링크:
-https://gonzaljeong.github.io/360-pano/?img=yangsan-01.jpg
-
-4. index.html 관련
-- index.html은 저장소 최상위(root)에 1개만 있습니다.
-- 새 사진을 추가할 때 index.html을 수정할 필요가 없습니다.
-- index.html이 주소의 ?img= 뒤에 있는 파일명을 읽어서 pano 폴더의 해당 사진을 자동으로 360 뷰어로 표시합니다.
-
-5. 파일명 권장 규칙
-- 영문 소문자, 숫자, 하이픈(-) 사용을 권장합니다.
-- 확장자 .jpg를 포함해야 합니다.
-
-예:
-wonji-01.jpg
-yangsan-mulgum.jpg
-deokgok-reservoir.jpg
-
-6. 현재 구조
 360-pano/
-  index.html
+  index.html                 -> 공통 360 뷰어
+  manager.html               -> 전체 관리용(본인용)
   360_사용방법.txt
-  pano/
-    wonji-01.jpg
-    wonji-02.jpg
-    wonji-03.jpg
-    wonji-04.jpg
+  wonji/                     -> 원지 프로젝트 사진
+  omh/                       -> 외매화 프로젝트 사진
+  share/                     -> 담당자에게 전달할 HTML 파일
+  scripts/                   -> 담당자용 HTML 자동 생성 스크립트
+  .github/workflows/         -> 자동 생성 실행 설정
+
+
+2. 사진 추가 / 삭제 / 이름 변경
+
+PC의 로컬 저장소에서 프로젝트 폴더 안의 사진을 일반 파일처럼 관리합니다.
+
+예:
+C:\Users\Administrator\Documents\GitHub\360-pano\wonji
+C:\Users\Administrator\Documents\GitHub\360-pano\omh
+
+변경 후 GitHub Desktop에서 반드시:
+
+1) Summary 입력
+2) Commit to main
+3) Push origin
+
+까지 실행해야 GitHub와 360 공유 페이지에 반영됩니다.
+
+
+3. 전체 관리용 페이지
+
+본인이 모든 프로젝트를 관리할 때 사용하는 주소:
+
+https://gonzaljeong.github.io/360-pano/manager.html
+
+여기서는 모든 프로젝트 폴더가 표시됩니다.
+각 폴더에서:
+- 열기
+- 담당자 파일
+
+기능을 사용할 수 있습니다.
+
+
+4. 담당자용 HTML 파일
+
+담당자에게 링크 대신 HTML 파일 자체를 전달할 수 있습니다.
+
+현재 예:
+share/wonji_360관리.html
+share/omh_360관리.html
+
+원지 담당자에게는 원지용 HTML만 전달하고,
+외매화 담당자에게는 외매화용 HTML만 전달합니다.
+
+담당자가 받은 HTML 파일을 더블클릭하면 해당 프로젝트 전용 관리 화면이 열립니다.
+다른 프로젝트로 돌아가는 버튼은 표시되지 않습니다.
+
+담당자용 HTML은 사진 자체를 포함하는 파일이 아닙니다.
+인터넷을 통해 GitHub의 최신 사진 목록을 읽으므로,
+한 번 담당자에게 전달한 뒤 사진을 추가/삭제해도 HTML 파일을 다시 전달할 필요가 없습니다.
+
+
+5. 새 프로젝트 추가 시 담당자용 파일 자동 생성
+
+예를 들어 새 프로젝트 폴더를:
+
+deokgok/
+
+처럼 만들고 그 안에 JPG 사진을 넣은 뒤 Commit -> Push 하면,
+GitHub Actions가 프로젝트 폴더를 확인하여 자동으로:
+
+share/deokgok_360관리.html
+
+파일을 생성합니다.
+
+즉 새 프로젝트마다 HTML 코드를 직접 만들 필요가 없습니다.
+
+주의:
+새 프로젝트 폴더가 추가/삭제/이름 변경된 경우 GitHub Actions가 원격 저장소에 자동 커밋을 1회 만들 수 있습니다.
+그 다음 PC에서 작업하기 전에 GitHub Desktop에서 Fetch/Pull이 필요할 수 있습니다.
+기존 프로젝트 안의 사진만 추가/삭제하는 경우 담당자 HTML 내용은 바뀌지 않으므로 보통 별도 자동 커밋은 생기지 않습니다.
+
+
+6. 360 공유 링크 규칙
+
+원지(wonji)는 기존 링크 형식을 그대로 유지합니다.
+
+https://gonzaljeong.github.io/360-pano/?img=wj-01.jpg
+
+다른 프로젝트는 folder 값을 포함합니다.
+
+예: 외매화
+https://gonzaljeong.github.io/360-pano/?folder=omh&img=omh-01.JPG
+
+관리 페이지의 [링크 복사] 버튼을 사용하면 직접 주소를 만들 필요가 없습니다.
+
+
+7. index.html 관련
+
+index.html은 저장소 최상위(root)에 1개만 유지합니다.
+사진 추가/삭제/이름 변경 시 index.html은 수정할 필요가 없습니다.
+주소의 folder와 img 값을 읽어 해당 프로젝트 사진을 자동으로 360 뷰어에 표시합니다.
+
+
+8. 파일명 / 폴더명 권장 규칙
+
+폴더명:
+- 영문 소문자 권장
+- 예: wonji, omh, deokgok
+
+사진 파일명:
+- 영문 소문자, 숫자, 하이픈(-) 권장
+- jpg/jpeg/png 사용
+
+예:
+wj-01.jpg
+omh-01.jpg
+dg-01.jpg
+
 
 핵심 요약
-- 사진은 pano 폴더에 업로드
-- index.html은 수정하지 않음
-- 공유주소는 아래 형식
 
-https://gonzaljeong.github.io/360-pano/?img=파일명.jpg
+사진/폴더 수정
+-> GitHub Desktop Commit
+-> Push origin
+-> GitHub Pages 반영 대기
+
+전체 관리는:
+https://gonzaljeong.github.io/360-pano/manager.html
+
+담당자에게는 share 폴더의 해당 프로젝트용 *_360관리.html 파일을 전달합니다.
+새 프로젝트 폴더를 추가하면 담당자용 HTML은 자동 생성됩니다.
