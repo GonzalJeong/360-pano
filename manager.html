@@ -29,7 +29,7 @@
     .status.ok { color:var(--ok); } .status.error { color:var(--error); }
     .row { display:grid; grid-template-columns:minmax(0,1fr) 110px 105px; gap:10px; align-items:center; padding:14px 20px; border-bottom:1px solid var(--line); }
     .row:last-child { border-bottom:0; }
-    .folder-row { grid-template-columns:minmax(0,1fr) 110px; }
+    .folder-row { grid-template-columns:minmax(0,1fr) 95px 125px; }
     .name { font-weight:650; overflow-wrap:anywhere; }
     .meta { margin-top:4px; color:var(--muted); font-size:12px; }
     .empty { padding:32px 20px; text-align:center; color:var(--muted); }
@@ -42,8 +42,8 @@
       .toolbar #refreshBtn { grid-column:1 / -1; }
       .row { grid-template-columns:1fr 1fr; padding:14px 16px; }
       .row .info { grid-column:1 / -1; }
-      .folder-row { grid-template-columns:1fr auto; }
-      .folder-row .info { grid-column:auto; }
+      .folder-row { grid-template-columns:1fr 1fr; }
+      .folder-row .info { grid-column:1 / -1; }
     }
   </style>
 </head>
@@ -65,7 +65,7 @@
       <div id="list"></div>
     </section>
 
-    <div class="foot">사진·폴더 변경 후 GitHub Desktop에서 Commit → Push 하세요. 관리 페이지는 새로고침하면 최신 구조를 다시 읽습니다.</div>
+    <div class="foot">사진·폴더 변경 후 GitHub Desktop에서 Commit → Push 하세요. 새 프로젝트 폴더가 추가되면 담당자용 HTML은 GitHub Actions가 자동 생성합니다.</div>
   </main>
 
   <script>
@@ -74,9 +74,12 @@
     const BRANCH = "main";
     const DEFAULT_FOLDER = "wonji";
     const ROOT_API = `https://api.github.com/repos/${OWNER}/${REPO}/contents?ref=${BRANCH}`;
+    const RESERVED_FOLDERS = new Set([".github", "share", "scripts"]);
+    const PROJECT_LABELS = { wonji: "원지", omh: "외매화" };
 
     const params = new URLSearchParams(location.search);
     const activeFolder = params.get("folder");
+    const assignedMode = params.get("assigned") === "1";
     const listEl = document.getElementById("list");
     const statusEl = document.getElementById("status");
     const searchEl = document.getElementById("search");
@@ -86,6 +89,10 @@
     const subEl = document.getElementById("sub");
 
     let items = [];
+
+    function projectLabel(folder) {
+      return PROJECT_LABELS[folder.toLowerCase()] || folder;
+    }
 
     function supportedImage(name) {
       return /^[a-zA-Z0-9._-]+\.(jpg|jpeg|png)$/i.test(name);
@@ -109,10 +116,13 @@
 
     function viewerUrl(folder, file) {
       const url = new URL("./", location.href);
-      // 기존 원지 공유 링크 형식은 그대로 유지
       if (folder !== DEFAULT_FOLDER) url.searchParams.set("folder", folder);
       url.searchParams.set("img", file);
       return url.toString();
+    }
+
+    function assigneeFileUrl(folder) {
+      return new URL(`share/${encodeURIComponent(folder)}_360관리.html`, location.href).toString();
     }
 
     async function copyText(text, button) {
@@ -130,7 +140,7 @@
 
     function render() {
       const keyword = searchEl.value.trim().toLowerCase();
-      const visible = items.filter(x => x.name.toLowerCase().includes(keyword));
+      const visible = items.filter(x => x.name.toLowerCase().includes(keyword) || projectLabel(x.name).toLowerCase().includes(keyword));
       listEl.innerHTML = "";
 
       if (!visible.length) {
@@ -146,7 +156,7 @@
         info.className = "info";
         const name = document.createElement("div");
         name.className = "name";
-        name.textContent = item.name;
+        name.textContent = activeFolder ? item.name : `${projectLabel(item.name)} (${item.name})`;
         info.appendChild(name);
 
         if (activeFolder) {
@@ -172,7 +182,14 @@
           openFolder.className = "btn primary";
           openFolder.textContent = "열기";
           openFolder.href = managerUrl(item.name);
-          row.append(info, openFolder);
+
+          const assignee = document.createElement("a");
+          assignee.className = "btn secondary";
+          assignee.textContent = "담당자 파일";
+          assignee.href = assigneeFileUrl(item.name);
+          assignee.download = `${projectLabel(item.name)}_360관리.html`;
+
+          row.append(info, openFolder, assignee);
         }
         listEl.appendChild(row);
       }
@@ -190,10 +207,11 @@
       statusEl.textContent = "목록을 불러오는 중...";
       try {
         if (activeFolder) {
-          if (!safeFolder(activeFolder)) throw new Error("Invalid folder");
-          titleEl.textContent = `360 Panorama Manager · ${activeFolder}`;
-          subEl.textContent = `${activeFolder} 폴더의 파노라마 사진입니다.`;
-          backBtn.style.display = "inline-flex";
+          if (!safeFolder(activeFolder) || RESERVED_FOLDERS.has(activeFolder)) throw new Error("Invalid folder");
+          const label = projectLabel(activeFolder);
+          titleEl.textContent = assignedMode ? `${label} 360 Panorama` : `360 Panorama Manager · ${label}`;
+          subEl.textContent = assignedMode ? `${label} 담당자용 파노라마 관리 화면입니다.` : `${label} (${activeFolder}) 폴더의 파노라마 사진입니다.`;
+          backBtn.style.display = assignedMode ? "none" : "inline-flex";
           searchEl.placeholder = "사진 파일명 검색";
           const api = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodeURIComponent(activeFolder)}?ref=${BRANCH}`;
           const data = await fetchJson(api);
@@ -202,11 +220,11 @@
           statusEl.textContent = `파노라마 사진 ${items.length}개 · 갱신 완료`;
         } else {
           titleEl.textContent = "360 Panorama Manager";
-          subEl.textContent = "폴더를 선택하면 해당 장소의 파노라마 사진과 공유 링크를 관리할 수 있습니다.";
+          subEl.textContent = "전체 관리용 화면입니다. 폴더별 보기와 담당자용 HTML 파일 다운로드를 할 수 있습니다.";
           backBtn.style.display = "none";
           searchEl.placeholder = "폴더명 검색";
           const data = await fetchJson(ROOT_API);
-          items = data.filter(x => x.type === "dir" && safeFolder(x.name))
+          items = data.filter(x => x.type === "dir" && safeFolder(x.name) && !RESERVED_FOLDERS.has(x.name))
                       .sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric:true,sensitivity:"base"}));
           statusEl.textContent = `파노라마 폴더 ${items.length}개 · 갱신 완료`;
         }
