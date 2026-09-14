@@ -3,31 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>360 Panorama</title>
 
-  <!-- Pannellum 360 Viewer -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
-  />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
   <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
 
   <style>
-    html,
-    body {
+    html, body {
       margin: 0;
       width: 100%;
       height: 100%;
       overflow: hidden;
       background: #000;
     }
-
-    #panorama {
-      width: 100%;
-      height: 100%;
-    }
-
+    #panorama { width: 100%; height: 100%; }
     #message {
       position: absolute;
       inset: 0;
@@ -44,67 +33,42 @@
     }
   </style>
 </head>
-
 <body>
-  <!-- 360 Viewer 영역 -->
   <div id="panorama"></div>
-
-  <!-- 잘못된 주소일 때 표시할 메시지 -->
   <div id="message"></div>
 
   <script>
-    /*
-      사용 방법
-      ------------------------------------------------------------
-      1) GitHub 저장소의 pano 폴더에 360 JPG 업로드
-         예: pano/wonji-01.jpg
-
-      2) 아래와 같이 접속
-         https://gonzaljeong.github.io/360-pano/?img=wonji-01.jpg
-
-      3) 새 사진을 추가해도 이 index.html은 수정할 필요 없음
-    */
-
     const params = new URLSearchParams(window.location.search);
     const file = params.get("img");
+    const requestedFolder = params.get("folder");
+
+    // 기존 공유 링크(?img=wj-01.jpg)는 계속 wonji 폴더를 사용합니다.
+    const folder = requestedFolder || "wonji";
     const message = document.getElementById("message");
 
-    /*
-      보안 / 오입력 방지:
-      파일명에는 영문, 숫자, 점(.), 밑줄(_), 하이픈(-)만 허용
-      확장자는 jpg / jpeg / png만 허용
-    */
-    const validFile =
-      file &&
-      /^[a-zA-Z0-9._-]+\.(jpg|jpeg|png)$/i.test(file);
+    const validFile = file && /^[a-zA-Z0-9._-]+\.(jpg|jpeg|png)$/i.test(file);
+    const validFolder = /^[a-zA-Z0-9._-]+$/.test(folder);
 
-    if (!validFile) {
+    if (!validFile || !validFolder) {
       message.style.display = "flex";
       message.innerHTML =
-        "360° 파노라마 파일이 지정되지 않았습니다.<br><br>" +
-        "예: ?img=wonji-01.jpg";
+        "360° 파노라마 주소를 확인하세요.<br><br>" +
+        "원지 예: ?img=wj-01.jpg<br>" +
+        "다른 폴더 예: ?folder=omh&img=omh-01.JPG";
     } else {
-      // 모든 360 이미지는 pano 폴더에서 불러옴
-      const imagePath = "pano/" + file;
+      const imagePath = encodeURIComponent(folder) + "/" + encodeURIComponent(file);
 
-      // 브라우저 탭 제목을 파일명 기준으로 설정
-      document.title =
-        file.replace(/\.[^.]+$/, "") + " | 360 Panorama";
+      document.title = file.replace(/\.[^.]+$/, "") + " | 360 Panorama";
 
-      // 360 Viewer 실행
       pannellum.viewer("panorama", {
         type: "equirectangular",
         panorama: imagePath,
-
         autoLoad: true,
         autoRotate: -2,
-
         showControls: true,
         mouseZoom: true,
         draggable: true,
-
         compass: false,
-
         hfov: 100,
         minHfov: 30,
         maxHfov: 120
