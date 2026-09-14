@@ -1,33 +1,39 @@
 Gonzal 360 Panorama 사용방법
 
-1. 기본 구조
+※ 평소에 직접 관리할 것은 프로젝트 폴더의 사진뿐입니다.
+※ index.html / manager.html / .git 은 건드리지 않습니다.
+
+
+1. 최종 폴더 구조
 
 360-pano/
-  index.html                 -> 공통 360 뷰어
-  manager.html               -> 전체 관리용(본인용)
+  wonji/                 -> 원지 사진
+  omh/                   -> 외매화 사진
+  새프로젝트/            -> 새 현장이 생기면 같은 방식으로 추가
+  index.html             -> 공통 360 뷰어 (수정하지 않음)
+  manager.html           -> 전체 관리용 (수정하지 않음)
   360_사용방법.txt
-  wonji/                     -> 원지 프로젝트 사진
-  omh/                       -> 외매화 프로젝트 사진
-  share/                     -> 담당자에게 전달할 HTML 파일
-  scripts/                   -> 담당자용 HTML 자동 생성 스크립트
-  .github/workflows/         -> 자동 생성 실행 설정
+  README.md
+
+.git 폴더는 Git이 자동으로 사용하는 숨김 관리 폴더입니다.
+삭제하거나 수정하지 않습니다.
 
 
 2. 사진 추가 / 삭제 / 이름 변경
 
-PC의 로컬 저장소에서 프로젝트 폴더 안의 사진을 일반 파일처럼 관리합니다.
+Windows 탐색기에서 해당 프로젝트 폴더의 사진만 관리합니다.
 
 예:
 C:\Users\Administrator\Documents\GitHub\360-pano\wonji
 C:\Users\Administrator\Documents\GitHub\360-pano\omh
 
-변경 후 GitHub Desktop에서 반드시:
+사진 변경 후 GitHub Desktop에서:
 
 1) Summary 입력
 2) Commit to main
 3) Push origin
 
-까지 실행해야 GitHub와 360 공유 페이지에 반영됩니다.
+여기까지 해야 GitHub와 360 공유 페이지에 반영됩니다.
 
 
 3. 전체 관리용 페이지
@@ -36,100 +42,119 @@ C:\Users\Administrator\Documents\GitHub\360-pano\omh
 
 https://gonzaljeong.github.io/360-pano/manager.html
 
-여기서는 모든 프로젝트 폴더가 표시됩니다.
-각 폴더에서:
+manager.html에서는 프로젝트 폴더가 자동으로 표시됩니다.
+
+각 프로젝트에는:
 - 열기
-- 담당자 파일
+- 담당자 파일 받기
 
-기능을 사용할 수 있습니다.
+버튼이 표시됩니다.
 
+[열기]
+해당 프로젝트의 사진 목록을 확인하고 360 보기 / 링크 복사를 사용합니다.
 
-4. 담당자용 HTML 파일
+[담당자 파일 받기]
+해당 프로젝트만 볼 수 있는 담당자용 HTML 파일을 PC로 바로 다운로드합니다.
 
-담당자에게 링크 대신 HTML 파일 자체를 전달할 수 있습니다.
-
-현재 예:
-share/wonji_360관리.html
-share/omh_360관리.html
-
-원지 담당자에게는 원지용 HTML만 전달하고,
-외매화 담당자에게는 외매화용 HTML만 전달합니다.
-
-담당자가 받은 HTML 파일을 더블클릭하면 해당 프로젝트 전용 관리 화면이 열립니다.
-다른 프로젝트로 돌아가는 버튼은 표시되지 않습니다.
-
-담당자용 HTML은 사진 자체를 포함하는 파일이 아닙니다.
-인터넷을 통해 GitHub의 최신 사진 목록을 읽으므로,
-한 번 담당자에게 전달한 뒤 사진을 추가/삭제해도 HTML 파일을 다시 전달할 필요가 없습니다.
+예:
+원지 -> 원지_360관리.html
+외매화 -> 외매화_360관리.html
 
 
-5. 새 프로젝트 추가 시 담당자용 파일 자동 생성
+4. 담당자에게 파일 전달
 
-예를 들어 새 프로젝트 폴더를:
+manager.html에서 해당 프로젝트의 [담당자 파일 받기]를 누릅니다.
 
-deokgok/
+다운로드된 HTML 파일 하나만 담당자에게 전달합니다.
 
-처럼 만들고 그 안에 JPG 사진을 넣은 뒤 Commit -> Push 하면,
-GitHub Actions가 프로젝트 폴더를 확인하여 자동으로:
+담당자는 받은 HTML 파일을 더블클릭하면 됩니다.
+그 파일에는 해당 프로젝트 사진만 표시되고 다른 프로젝트 선택 화면은 없습니다.
 
-share/deokgok_360관리.html
+담당자용 HTML은 사진 자체를 포함하지 않습니다.
+인터넷을 통해 GitHub의 최신 사진 목록을 자동으로 읽습니다.
 
-파일을 생성합니다.
+따라서 담당자에게 파일을 한 번 전달한 뒤,
+프로젝트 사진을 추가/삭제해도 담당자용 HTML을 다시 전달할 필요가 없습니다.
+담당자가 HTML을 다시 열거나 [새로고침]을 누르면 최신 목록이 표시됩니다.
 
-즉 새 프로젝트마다 HTML 코드를 직접 만들 필요가 없습니다.
 
-주의:
-새 프로젝트 폴더가 추가/삭제/이름 변경된 경우 GitHub Actions가 원격 저장소에 자동 커밋을 1회 만들 수 있습니다.
-그 다음 PC에서 작업하기 전에 GitHub Desktop에서 Fetch/Pull이 필요할 수 있습니다.
-기존 프로젝트 안의 사진만 추가/삭제하는 경우 담당자 HTML 내용은 바뀌지 않으므로 보통 별도 자동 커밋은 생기지 않습니다.
+5. 새 프로젝트 추가
+
+예를 들어 새 프로젝트가 deokgok인 경우:
+
+360-pano\deokgok\
+
+폴더를 만들고 그 안에 360 사진을 넣습니다.
+
+그 다음:
+
+Commit to main -> Push origin
+
+하고 manager.html을 새로고침합니다.
+
+그러면 deokgok 프로젝트가 자동으로 목록에 나타납니다.
+[담당자 파일 받기]를 누르면 deokgok_360관리.html이 바로 만들어집니다.
+
+새 프로젝트를 만들 때 별도의 HTML 파일이나 스크립트를 직접 만들 필요가 없습니다.
 
 
 6. 360 공유 링크 규칙
 
-원지(wonji)는 기존 링크 형식을 그대로 유지합니다.
+관리 페이지의 [링크 복사] 버튼을 사용하는 것이 가장 안전합니다.
+
+원지(wonji)는 기존 공유 링크도 계속 사용할 수 있습니다.
 
 https://gonzaljeong.github.io/360-pano/?img=wj-01.jpg
 
-다른 프로젝트는 folder 값을 포함합니다.
+외매화 등 다른 프로젝트는 folder 값이 포함됩니다.
 
-예: 외매화
+예:
 https://gonzaljeong.github.io/360-pano/?folder=omh&img=omh-01.JPG
 
-관리 페이지의 [링크 복사] 버튼을 사용하면 직접 주소를 만들 필요가 없습니다.
 
+7. 파일명 / 폴더명 권장 규칙
 
-7. index.html 관련
-
-index.html은 저장소 최상위(root)에 1개만 유지합니다.
-사진 추가/삭제/이름 변경 시 index.html은 수정할 필요가 없습니다.
-주소의 folder와 img 값을 읽어 해당 프로젝트 사진을 자동으로 360 뷰어에 표시합니다.
-
-
-8. 파일명 / 폴더명 권장 규칙
-
-폴더명:
+프로젝트 폴더명:
 - 영문 소문자 권장
-- 예: wonji, omh, deokgok
+- 공백 없이 사용
+
+예:
+wonji
+omh
+deokgok
 
 사진 파일명:
-- 영문 소문자, 숫자, 하이픈(-) 권장
-- jpg/jpeg/png 사용
+- 영문, 숫자, 하이픈(-), 밑줄(_) 사용 권장
+- jpg / jpeg / png 사용
 
 예:
 wj-01.jpg
-omh-01.jpg
+omh-01.JPG
 dg-01.jpg
 
 
-핵심 요약
+8. 가장 중요한 운영 순서
 
-사진/폴더 수정
--> GitHub Desktop Commit
+평소 작업은 이것만 기억하면 됩니다.
+
+프로젝트 폴더에서 사진 수정
+-> GitHub Desktop
+-> Summary 입력
+-> Commit to main
 -> Push origin
--> GitHub Pages 반영 대기
+-> manager.html 새로고침
 
-전체 관리는:
-https://gonzaljeong.github.io/360-pano/manager.html
+담당자에게 새 파일이 필요한 경우에만:
+manager.html -> [담당자 파일 받기] -> 생성된 HTML 전달
 
-담당자에게는 share 폴더의 해당 프로젝트용 *_360관리.html 파일을 전달합니다.
-새 프로젝트 폴더를 추가하면 담당자용 HTML은 자동 생성됩니다.
+
+9. 건드리지 않는 항목
+
+평소에는 아래 항목을 수정하거나 삭제하지 않습니다.
+
+.git
+index.html
+manager.html
+README.md
+
+사진은 프로젝트 폴더에서만 관리합니다.
