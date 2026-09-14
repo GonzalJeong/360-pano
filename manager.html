@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>360 Panorama Manager</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --line: #dbe3ec;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-dark: #1d4ed8;
+      --soft: #eef4ff;
+      --ok: #0f766e;
+      --error: #b91c1c;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, "Noto Sans KR", sans-serif;
+    }
+
+    .wrap {
+      width: min(980px, calc(100% - 28px));
+      margin: 32px auto;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(31, 41, 55, 0.06);
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    .sub {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    input[type="text"] {
+      width: 100%;
+      min-width: 0;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    button, a.btn {
+      border: 0;
+      border-radius: 9px;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    button.primary, a.primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    button.primary:hover, a.primary:hover { background: var(--accent-dark); }
+
+    button.secondary, a.secondary {
+      background: var(--soft);
+      color: var(--accent-dark);
+    }
+
+    .manual {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfdff;
+    }
+
+    .manual-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--muted);
+    }
+
+    .manual-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 8px;
+    }
+
+    .status {
+      padding: 12px 20px;
+      color: var(--muted);
+      font-size: 13px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .status.error { color: var(--error); }
+    .status.ok { color: var(--ok); }
+
+    .list { width: 100%; }
+
+    .row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 110px 105px;
+      gap: 10px;
+      align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .row:last-child { border-bottom: 0; }
+
+    .file-name {
+      font-weight: 650;
+      overflow-wrap: anywhere;
+    }
+
+    .file-meta {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .empty {
+      padding: 32px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .foot {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    @media (max-width: 640px) {
+      .wrap { margin: 16px auto; width: min(100% - 16px, 980px); }
+      .header { padding: 20px 16px; }
+      .toolbar { grid-template-columns: 1fr auto; padding: 14px 16px; }
+      .manual { padding: 14px 16px; }
+      .manual-row { grid-template-columns: 1fr 1fr; }
+      .manual-row input { grid-column: 1 / -1; }
+      .row {
+        grid-template-columns: 1fr 1fr;
+        padding: 14px 16px;
+      }
+      .row .file-info { grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <div class="header">
+        <h1>360 Panorama Manager</h1>
+        <p class="sub">
+          GitHub <b>pano</b> 폴더의 사진을 자동으로 읽어 360° 보기 링크를 만들고 복사합니다.<br />
+          기존 공유 방식 <b>?img=파일명.jpg</b>은 그대로 유지됩니다.
+        </p>
+      </div>
+
+      <div class="toolbar">
+        <input id="search" type="text" placeholder="파일명 검색 (예: wj)" autocomplete="off" />
+        <button id="refreshBtn" class="secondary" type="button">새로고침</button>
+      </div>
+
+      <div class="manual">
+        <div class="manual-title">파일명 직접 입력</div>
+        <div class="manual-row">
+          <input id="manualFile" type="text" placeholder="예: wj-01.jpg" autocomplete="off" />
+          <button id="manualOpen" class="secondary" type="button">360 보기</button>
+          <button id="manualCopy" class="primary" type="button">링크 복사</button>
+        </div>
+      </div>
+
+      <div id="status" class="status">사진 목록을 불러오는 중...</div>
+      <div id="list" class="list"></div>
+    </section>
+
+    <div class="foot">
+      이 페이지는 링크 생성용입니다. 사진 추가·삭제·이름 변경은 PC의 pano 폴더에서 처리한 뒤 GitHub Desktop으로 Commit → Push 하세요.
+    </div>
+  </main>
+
+  <script>
+    const OWNER = "GonzalJeong";
+    const REPO = "360-pano";
+    const BRANCH = "main";
+    const PANO_FOLDER = "pano";
+    const API_URL = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PANO_FOLDER}?ref=${BRANCH}`;
+
+    const listEl = document.getElementById("list");
+    const statusEl = document.getElementById("status");
+    const searchEl = document.getElementById("search");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const manualFile = document.getElementById("manualFile");
+    const manualOpen = document.getElementById("manualOpen");
+    const manualCopy = document.getElementById("manualCopy");
+
+    let files = [];
+
+    function viewerUrl(fileName) {
+      const url = new URL("./", window.location.href);
+      url.searchParams.set("img", fileName);
+      return url.toString();
+    }
+
+    function supportedName(name) {
+      return /^[a-zA-Z0-9._-]+\.(jpg|jpeg|png)$/i.test(name);
+    }
+
+    function formatBytes(bytes) {
+      if (!Number.isFinite(bytes)) return "";
+      if (bytes < 1024) return `${bytes} B`;
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+      return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+    }
+
+    async function copyText(text, button) {
+      const original = button.textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        button.textContent = "복사됨";
+      } catch (err) {
+        const temp = document.createElement("textarea");
+        temp.value = text;
+        temp.style.position = "fixed";
+        temp.style.opacity = "0";
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        temp.remove();
+        button.textContent = "복사됨";
+      }
+      setTimeout(() => { button.textContent = original; }, 1200);
+    }
+
+    function render() {
+      const keyword = searchEl.value.trim().toLowerCase();
+      const visible = files.filter(file => file.name.toLowerCase().includes(keyword));
+
+      listEl.innerHTML = "";
+
+      if (!visible.length) {
+        listEl.innerHTML = '<div class="empty">표시할 파노라마 사진이 없습니다.</div>';
+        return;
+      }
+
+      for (const file of visible) {
+        const row = document.createElement("div");
+        row.className = "row";
+
+        const info = document.createElement("div");
+        info.className = "file-info";
+        info.innerHTML = `
+          <div class="file-name"></div>
+          <div class="file-meta"></div>
+        `;
+        info.querySelector(".file-name").textContent = file.name;
+        info.querySelector(".file-meta").textContent = formatBytes(file.size);
+
+        const open = document.createElement("a");
+        open.className = "btn secondary";
+        open.textContent = "360 보기";
+        open.href = viewerUrl(file.name);
+        open.target = "_blank";
+        open.rel = "noopener";
+
+        const copy = document.createElement("button");
+        copy.className = "primary";
+        copy.type = "button";
+        copy.textContent = "링크 복사";
+        copy.addEventListener("click", () => copyText(viewerUrl(file.name), copy));
+
+        row.append(info, open, copy);
+        listEl.appendChild(row);
+      }
+    }
+
+    async function loadFiles() {
+      statusEl.className = "status";
+      statusEl.textContent = "사진 목록을 불러오는 중...";
+      refreshBtn.disabled = true;
+
+      try {
+        const response = await fetch(API_URL, {
+          headers: { "Accept": "application/vnd.github+json" },
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          throw new Error(`GitHub API ${response.status}`);
+        }
+
+        const data = await response.json();
+        files = data
+          .filter(item => item.type === "file" && supportedName(item.name))
+          .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
+
+        statusEl.className = "status ok";
+        statusEl.textContent = `파노라마 사진 ${files.length}개 · 목록 갱신 완료`;
+        render();
+      } catch (err) {
+        files = [];
+        listEl.innerHTML = "";
+        statusEl.className = "status error";
+        statusEl.textContent = "사진 목록을 불러오지 못했습니다. 잠시 후 새로고침하거나 위의 파일명 직접 입력을 사용하세요.";
+      } finally {
+        refreshBtn.disabled = false;
+      }
+    }
+
+    function manualName() {
+      return manualFile.value.trim();
+    }
+
+    function validateManual() {
+      const name = manualName();
+      if (!supportedName(name)) {
+        alert("파일명을 확인하세요. 예: wj-01.jpg\n영문/숫자/점/밑줄/하이픈과 jpg/jpeg/png 확장자를 사용할 수 있습니다.");
+        return null;
+      }
+      return name;
+    }
+
+    manualOpen.addEventListener("click", () => {
+      const name = validateManual();
+      if (name) window.open(viewerUrl(name), "_blank", "noopener");
+    });
+
+    manualCopy.addEventListener("click", () => {
+      const name = validateManual();
+      if (name) copyText(viewerUrl(name), manualCopy);
+    });
+
+    manualFile.addEventListener("keydown", event => {
+      if (event.key === "Enter") manualOpen.click();
+    });
+
+    searchEl.addEventListener("input", render);
+    refreshBtn.addEventListener("click", loadFiles);
+
+    loadFiles();
+  </script>
+</body>
+</html>
